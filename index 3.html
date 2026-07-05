@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>อู่นัสเซอร์วิส | ระบบค้นหาราคาและเขียนบิล</title>
+  <style>
+    :root{--bg:#07110d;--panel:#0f1d17;--card:#13261e;--green:#22c55e;--green2:#16a34a;--text:#eef7f1;--muted:#9fb0a7;--line:#274033;--warn:#f59e0b;--danger:#ef4444}
+    *{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:linear-gradient(135deg,#020403,#0a1b12);color:var(--text)}
+    header{padding:28px 18px;text-align:center;border-bottom:1px solid var(--line);background:#050a08}
+    .logo{width:84px;height:84px;margin:auto;border-radius:22px;background:linear-gradient(135deg,#111,#1fe36a);display:grid;place-items:center;font-weight:900;font-size:28px;box-shadow:0 0 30px #22c55e55}
+    h1{margin:12px 0 6px;font-size:32px} p{color:var(--muted);line-height:1.6}.wrap{max-width:1100px;margin:auto;padding:18px}.grid{display:grid;grid-template-columns:1fr;gap:16px}@media(min-width:900px){.grid{grid-template-columns:1.1fr .9fr}}
+    .card{background:rgba(19,38,30,.92);border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 12px 35px #0008}.card h2{margin:0 0 12px;font-size:22px}.row{display:grid;grid-template-columns:1fr;gap:10px}@media(min-width:700px){.row{grid-template-columns:1fr 1fr}}
+    input,select,textarea,button{width:100%;border-radius:14px;border:1px solid var(--line);padding:13px 14px;font-size:16px;background:#08110d;color:var(--text)}textarea{min-height:84px}button{background:var(--green);border:0;color:#031007;font-weight:800;cursor:pointer}button.secondary{background:#20372b;color:var(--text);border:1px solid var(--line)}button.danger{background:var(--danger);color:white}.small{font-size:13px;color:var(--muted)}
+    table{width:100%;border-collapse:collapse;margin-top:12px;overflow:hidden;border-radius:14px}th,td{padding:10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:#b7f7cc;background:#0a170f}.pill{display:inline-block;background:#173e27;color:#a8f7c2;border:1px solid #23643b;padding:5px 10px;border-radius:999px;font-size:13px}.total{font-size:28px;color:#86efac;font-weight:900}.actions{display:flex;gap:8px;flex-wrap:wrap}.actions button{width:auto;padding:10px 12px}.hidden{display:none}.print-area{background:white;color:#111;padding:22px;border-radius:12px}.print-area *{color:#111}@media print{body{background:white}.no-print,header,.card:not(.print-card){display:none!important}.print-card{display:block!important;border:0;box-shadow:none}.wrap{padding:0}}
+  </style>
+</head>
+<body>
+<header class="no-print">
+  <div class="logo">NS</div>
+  <h1>อู่นัสเซอร์วิส</h1>
+  <p>ระบบค้นหาราคาอะไหล่ • บันทึกรายการซ่อม • เขียนบิล ใช้ได้บน Safari / iPad</p>
+</header>
+<main class="wrap">
+  <section class="grid no-print">
+    <div class="card">
+      <h2>ค้นหาราคาอะไหล่ / ค่าแรง</h2>
+      <input id="search" placeholder="พิมพ์ชื่อ เช่น หัวฉีด, น้ำมันเครื่อง, ผ้าเบรก" oninput="renderParts()">
+      <table><thead><tr><th>รายการ</th><th>หมวด</th><th>ราคา</th><th></th></tr></thead><tbody id="partsBody"></tbody></table>
+    </div>
+    <div class="card">
+      <h2>เพิ่มรายการใหม่</h2>
+      <div class="row"><input id="pName" placeholder="ชื่อรายการ"><input id="pPrice" type="number" placeholder="ราคา"></div><br>
+      <select id="pCat"><option>อะไหล่</option><option>ค่าแรง</option><option>หัวฉีด</option><option>ช่วงล่าง</option><option>ห้องเครื่อง</option></select><br><br>
+      <button onclick="addPart()">+ เพิ่มเข้าระบบราคา</button>
+      <p class="small">ข้อมูลจะจำในเครื่องที่ใช้งาน ถ้าเปลี่ยนเครื่องให้เพิ่มข้อมูลใหม่หรือคัดลอกจากไฟล์เดิม</p>
+    </div>
+  </section>
+
+  <section class="grid no-print" style="margin-top:16px">
+    <div class="card">
+      <h2>ข้อมูลรถ / ลูกค้า</h2>
+      <div class="row"><input id="cust" placeholder="ชื่อลูกค้า"><input id="phone" placeholder="เบอร์โทร"></div><br>
+      <div class="row"><input id="car" placeholder="รุ่นรถ / ยี่ห้อ"><input id="plate" placeholder="ทะเบียนรถ"></div><br>
+      <textarea id="note" placeholder="หมายเหตุ เช่น อาการรถ หรือสิ่งที่ต้องเช็ก"></textarea>
+    </div>
+    <div class="card">
+      <h2>รายการในบิล</h2>
+      <div class="row"><input id="manualName" placeholder="รายการเอง"><input id="manualPrice" type="number" placeholder="ราคา"></div><br>
+      <button onclick="addManual()">+ เพิ่มรายการเอง</button>
+      <table><thead><tr><th>รายการ</th><th>จำนวน</th><th>ราคา</th><th></th></tr></thead><tbody id="billBody"></tbody></table>
+      <p>รวมทั้งหมด: <span class="total" id="total">0</span> บาท</p>
+      <div class="actions"><button onclick="makeBill()">สร้างบิล</button><button class="secondary" onclick="window.print()">พิมพ์ / บันทึก PDF</button><button class="danger" onclick="clearBill()">ล้างบิล</button></div>
+    </div>
+  </section>
+
+  <section class="card print-card hidden" id="printCard" style="margin-top:16px">
+    <div class="print-area" id="billPrint"></div>
+  </section>
+</main>
+<script>
+const defaultParts=[
+ {name:'ล้างหัวฉีดเบนซิน',cat:'หัวฉีด',price:800},{name:'ล้างหัวฉีดดีเซล',cat:'หัวฉีด',price:1200},{name:'เช็กหัวฉีด',cat:'หัวฉีด',price:500},
+ {name:'เปลี่ยนน้ำมันเครื่อง',cat:'ห้องเครื่อง',price:350},{name:'กรองน้ำมันเครื่อง',cat:'อะไหล่',price:250},{name:'น้ำมันเครื่อง',cat:'อะไหล่',price:850},
+ {name:'ผ้าเบรกหน้า',cat:'ช่วงล่าง',price:900},{name:'ลูกหมาก',cat:'ช่วงล่าง',price:650},{name:'ค่าแรงทั่วไป',cat:'ค่าแรง',price:500},{name:'สไลด์รถ 24 ชม.',cat:'ค่าแรง',price:1500}
+];
+let parts=JSON.parse(localStorage.getItem('parts')||'null')||defaultParts;let bill=[];
+function money(n){return Number(n||0).toLocaleString('th-TH')}
+function save(){localStorage.setItem('parts',JSON.stringify(parts))}
+function renderParts(){let q=document.getElementById('search').value.trim().toLowerCase();let rows=parts.filter(p=>p.name.toLowerCase().includes(q)||p.cat.toLowerCase().includes(q));document.getElementById('partsBody').innerHTML=rows.map((p,i)=>`<tr><td>${p.name}</td><td><span class="pill">${p.cat}</span></td><td>${money(p.price)} บาท</td><td><button onclick='addToBill(${parts.indexOf(p)})'>ใส่บิล</button></td></tr>`).join('')||'<tr><td colspan="4">ไม่พบรายการ</td></tr>'}
+function addPart(){let name=pName.value.trim(),price=Number(pPrice.value);if(!name||!price)return alert('กรอกชื่อและราคาให้ครบก่อนนะ');parts.push({name,cat:pCat.value,price});save();pName.value='';pPrice.value='';renderParts()}
+function addToBill(i){bill.push({...parts[i],qty:1});renderBill()}
+function addManual(){let name=manualName.value.trim(),price=Number(manualPrice.value);if(!name||!price)return alert('กรอกรายการและราคาก่อนนะ');bill.push({name,cat:'รายการเอง',price,qty:1});manualName.value='';manualPrice.value='';renderBill()}
+function renderBill(){document.getElementById('billBody').innerHTML=bill.map((b,i)=>`<tr><td>${b.name}</td><td><input type='number' value='${b.qty}' min='1' onchange='bill[${i}].qty=Number(this.value);renderBill()'></td><td>${money(b.price*b.qty)}</td><td><button class='danger' onclick='bill.splice(${i},1);renderBill()'>ลบ</button></td></tr>`).join('');document.getElementById('total').textContent=money(bill.reduce((s,b)=>s+b.price*b.qty,0))}
+function makeBill(){let total=bill.reduce((s,b)=>s+b.price*b.qty,0);let date=new Date().toLocaleString('th-TH');billPrint.innerHTML=`<h2>อู่นัสเซอร์วิส</h2><p>รับซ่อมหัวฉีดเบนซิน/ดีเซล • ซ่อมรถทั่วไป • สไลด์รถ 24 ชม.</p><hr><p><b>วันที่:</b> ${date}</p><p><b>ลูกค้า:</b> ${cust.value||'-'} &nbsp; <b>โทร:</b> ${phone.value||'-'}</p><p><b>รถ:</b> ${car.value||'-'} &nbsp; <b>ทะเบียน:</b> ${plate.value||'-'}</p><p><b>หมายเหตุ:</b> ${note.value||'-'}</p><table><thead><tr><th>รายการ</th><th>จำนวน</th><th>ราคา</th></tr></thead><tbody>${bill.map(b=>`<tr><td>${b.name}</td><td>${b.qty}</td><td>${money(b.price*b.qty)} บาท</td></tr>`).join('')}</tbody></table><h2 style='text-align:right'>รวม ${money(total)} บาท</h2><br><p>ลงชื่อผู้รับเงิน ____________________</p>`;printCard.classList.remove('hidden');window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'})}
+function clearBill(){if(confirm('ล้างรายการในบิลทั้งหมด?')){bill=[];renderBill();printCard.classList.add('hidden')}}
+renderParts();renderBill();
+</script>
+</body>
+</html>
